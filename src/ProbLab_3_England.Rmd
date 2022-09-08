@@ -1,0 +1,100 @@
+---
+title: "ESS 575: Probability Lab 3 - Marginal Distributions"
+author: "Team England" 
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+header-includes:
+  - \usepackage{caption}
+editor_options: 
+  chunk_output_type: console
+knit: (function(inputFile, encoding){ 
+    out_dir <- '../';
+    rmarkdown::render(inputFile, encoding = encoding, output_file=file.path(dirname(inputFile), out_dir, 'ProbLab_3_England.pdf')) 
+  })
+---
+
+Team England:
+
+  - Caroline Blommel 
+  - Carolyn Coyle
+  - Bryn Crosby
+  - George Woolsey
+  
+cblommel@mail.colostate.edu, carolynm@mail.colostate.edu, brcrosby@rams.colostate.edu, george.woolsey@colostate.edu
+
+
+```{r setup, include=FALSE}
+# load packages
+library(tidyverse)
+library(lubridate)
+library(viridis)
+library(scales)
+library(gridExtra)
+library(kableExtra)
+library(MASS)
+# set seed
+set.seed(10)
+```
+
+# Question 1
+
+Fill in Table 2 to estimate the marginal probabilities of presence and absence of the two species. The cells show the joint probability of the events specified in the row and column. The right column and the bottom row show the marginal probabilities.
+
+\captionsetup[table]{labelformat=empty}
+
+```{r, warning=F, message=F, echo=FALSE}
+# create data table for answers
+kab_tab <- data.frame(
+  events = c(
+    "$R$"
+    , "$R^c$"
+    , "Marginal"
+  )
+  , s <- c(
+    "$\\Pr\\big(S,R\\big)=\\frac{2}{32}$"
+    , "$\\Pr\\big(S,R^c\\big)=\\frac{18}{32}$"
+    , "$\\Pr\\big(S\\big)=\\frac{20}{32}$"
+  )
+  , s_c <- c(
+    "$\\Pr\\big(S^c, R\\big)=\\frac{9}{32}$"
+    , "$\\Pr\\big(S^c, R^c\\big)=\\frac{3}{32}$"
+    , "$Pr\\big(S^c\\big)=\\frac{12}{32}$"
+  )
+  , margingal <- c(
+    "$\\Pr\\big(R\\big)=\\frac{11}{32}$"
+    , "$\\Pr\\big(R^c\\big)=\\frac{21}{32}$"
+    , "$\\sum=\\frac{32}{32}$"
+  )
+)
+
+# table
+kableExtra::kable(kab_tab
+  , format = "latex"
+  , escape = FALSE
+  # , booktabs = TRUE
+  , caption = "Table 2: Estimates of marginal probabilities for island occupancy"
+  , col.names = c(
+    "Events"
+    , "$S$ "
+    , "$S^c$ "
+    , "Marginal"
+  )
+) %>% 
+kableExtra::kable_styling(font_size = 11) %>% 
+# kableExtra::column_spec(1, bold = TRUE, width = "18em") %>% 
+kableExtra::kable_styling(latex_options = "HOLD_position")
+``` 
+
+
+
+What is the sum of the marginal rows?
+What is the sum of the marginal columns?
+Why? Note, when we marginalize over R we are effectively eliminating S and vice versa.
+
+
+
+
+
+
+
+
