@@ -32,6 +32,7 @@ library(scales)
 library(gridExtra)
 library(kableExtra)
 library(MASS)
+library(ggExtra)
 # set seed
 set.seed(10)
 ```
@@ -85,16 +86,143 @@ kableExtra::kable_styling(font_size = 11) %>%
 kableExtra::kable_styling(latex_options = "HOLD_position")
 ``` 
 
-
-
 What is the sum of the marginal rows?
+
+\textcolor{blue}{The sum of the marginal rows is 1 }
+
 What is the sum of the marginal columns?
-Why? Note, when we marginalize over R we are effectively eliminating S and vice versa.
+
+\textcolor{blue}{The sum of the marginal columns is 1 }
+
+Why? Note, when we marginalize over $R$ we are effectively eliminating $S$ and vice versa.
+
+\textcolor{blue}{When we marginalize over $R$ we are effecitvely eliminating $S$ because we are interested in making inference on a single parameter, R.}
+
+# Question 2
+
+Use the data in Table 1 and the probabilities in Table 2 to illustrate the rule for the union of two events, the probability that an island contains either species, $\Pr(R\cup S)$. You will need to derive the formula for the probability of event A or B to solve this problem. A Venn diagram might help you do so.
+
+$$
+\begin{aligned}
+\Pr(R\cup S) = \Pr(R) + \Pr(S) - \Pr(S, R)
+\end{aligned}
+$$
+
+where: 
+
+* $\Pr(R) = \frac{11}{32}$
+* $\Pr(S) = \frac{20}{32}$
+* $\Pr(S, R) = \frac{2}{32}$
+
+$$
+\begin{aligned}
+\Pr(R\cup S) = \frac{11}{32} + \frac{20}{32} - \frac{2}{32} = \frac{29}{32} = 90.6\%
+\end{aligned}
+$$
+
+# Question 3
+
+Use the marginal probabilities in Table 2 to calculate the probability that an island contains both species i.e., $\Pr(R,S)$, assuming that $R$ and $S$ are independent. Compare the results from those calculations with the probability that both species occur on an island calculated directly from the data in Table 1. Interpret the results ecologically. What is $\Pr(R\mid S)$ and $\Pr(S \mid R)$?
 
 
+**\textcolor{blue}{Assuming that $R$ and $S$ are independent:}**
+
+$$
+\begin{aligned}
+\Pr(R, S) = \Pr(R) \cdot \Pr(S)
+\end{aligned}
+$$
+where: 
+
+* $\Pr(R) = \frac{11}{32}$
+* $\Pr(S) = \frac{20}{32}$
+
+$$
+\begin{aligned}
+\Pr(R, S) = \frac{11}{32} \cdot \frac{20}{32} = 0.215 = 21.5\%
+\end{aligned}
+$$
+
+What is $\Pr(R\mid S)$ and $\Pr(S \mid R)$?
+
+$$
+\begin{aligned}
+\Pr(R\mid S) = \Pr(R) = \frac{11}{32}
+\end{aligned}
+$$
+$$
+\begin{aligned}
+\Pr(S\mid R) = \Pr(S) = \frac{20}{32}
+\end{aligned}
+$$
+
+\textcolor{blue}{Interpret the results ecologically }
 
 
+# Continuous random variables
 
+We now explore marginal distributions for continuous random variables.  This requires introducing a new distribution, the multivariate normal:
+$$ \mathbf{z} \sim {\sf mulitvariate} \text{ } {\sf normal}(\mu, \Sigma ) $$
+where $\mathbf{z}_i$ is a vector of random variables, $\mu$ is a vector of means (which can be the output of a deterministic model) and $Sigma$ is a variance covariance matrix.  The diagonal of $\Sigma$ contains the variances and the off diagonal contains the covariance of $\Sigma[i,j]$. The covariance can be calculated as $\sigma_i\sigma_j\rho$ where $\sigma_i$ is the standard deviation of the $ith$ random variable, $\sigma_j$ is the standard deviation of the $jth$ random variable, and $\rho$ is the correlation between the random variable $i$ and $j$.  The covariance matrix is square and symmetric. We will learn more about these matrices later in the course. For now, an example will go a long way toward helping you understand the multivariate normal distribution.
 
+The rate of inflation and the rate of return on investments are know to be positively correlated. Assume that the mean rate of inflation is `.03` with a standard deviation of `0.015`. Assume that the mean rate of return is `0.0531` with a standard deviation of `0.0746`. Assume the correlation between inflation and rate of return is `0.5`.
 
+You can simulate interest rate and inflation data reflecting their correlation using the following function:
 
+```{r, warning=F, message=F}
+DrawRates = function(n, int,int.sd, inf, inf.sd, rho.rates) {
+  covar = rho.rates * int.sd * inf.sd
+  Sigma <- matrix(c(int.sd^2, covar, covar, inf.sd^2), 2, 2)
+  mu = c(int,inf)
+  x = (MASS::mvrnorm(n = n, mu = mu, Sigma))
+  return(x)
+}
+
+mu.int = .0531
+sd.int = .07 #.0746
+mu.inf = .03
+sd.inf = .015 #.015
+rho=.5
+n = 10000
+
+x = DrawRates(n = n, int = mu.int, int.sd = sd.int, inf = mu.inf, inf.sd = sd.inf, rho.rates = rho)
+par(mfrow=c(1,1))
+plot(x[, 1], x[, 2], pch = 19, cex = .05, xlab = "Rate of return", ylab = "Rate of inflation")
+```
+
+What would this cloud look like if the rates were not correlated?
+
+\textcolor{blue}{If the rates were not correlated ... }
+
+Show an approximate plot of the marginal distribution of each random variable. It turns out this is the way we will do it with MCMC.
+
+```{r, warning=F, message=F}
+# create data frame
+dta <- data.frame(
+  return_rate = x[,1]
+  , inflation_rate = x[,2]
+)
+# return rate distribution
+ggplot(data = dta) + 
+  geom_histogram(aes(return_rate), fill = "transparent", lwd = 1, color = "black", alpha = 0.7) +
+  xlab("Rate of Return") +
+  theme_bw()
+# inflation rate distribution
+ggplot(data = dta) + 
+  geom_histogram(aes(inflation_rate), fill = "transparent", lwd = 1, color = "black", alpha = 0.7) +
+  xlab("Rate of Inflation") +
+  theme_bw()
+```
+
+Can you combine the histogram with the scatter plot to more clearly reveal the marginalization? Take a look at the `ggExtra` package and `ggMarginal` function.
+
+```{r, warning=F, message=F}
+p1 <- ggplot(dta, aes(x = return_rate, y = inflation_rate)) +
+  geom_point(alpha = 0.7, size = 0.7) +
+  xlab("Rate of Return") +
+  ylab("Rate of Inflation") +
+  theme_bw()
+
+p1 %>% 
+  ggExtra::ggMarginal(type = "histogram")
+```
